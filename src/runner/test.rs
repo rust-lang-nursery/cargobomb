@@ -369,15 +369,12 @@ pub(super) fn test_rustdoc<DB: WriteResults>(
     );
     assert_eq!(cargo_args[0], "rustdoc");
     let cargo_args: Vec<_> = cargo_args.iter().map(|s| s.as_str()).collect();
+    let mut env = metadata.environment_variables();
+    // docsrs-metadata requires a nightly environment, but crater sometimes runs tests on beta and
+    // stable.
+    env.insert("RUSTC_BOOTSTRAP", "1".to_string());
 
-    let res = run_cargo(
-        ctx,
-        build_env,
-        &cargo_args,
-        true,
-        local_packages_id,
-        metadata.environment_variables(),
-    );
+    let res = run_cargo(ctx, build_env, &cargo_args, true, local_packages_id, env);
 
     // Make sure to remove the built documentation
     // There is no point in storing it after the build is done
